@@ -65,13 +65,13 @@ public class FileController {
     @RequestMapping(method = RequestMethod.PATCH, value = "/files/{id}/move", consumes = "application/json", produces = "application/json")
     //, produces = "text/plain")//, consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,  produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public File moveFile(@RequestBody File parentId, @PathVariable Long id) throws IOException {
-        return fileservice.moveFile(parentId , id);
+        return fileservice.moveFile(parentId, id);
     }
 
     // cut a file
     @RequestMapping(method = RequestMethod.DELETE, value = "/files/{id}/cut")
     public void cutFile(@PathVariable Long id) {
-       fileservice.cutFile(id);
+        fileservice.cutFile(id);
     }
 
     //paste a file

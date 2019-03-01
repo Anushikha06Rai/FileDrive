@@ -1,5 +1,7 @@
 package com.example.filedemo.model;
 
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -21,8 +23,15 @@ public class File {
     @Lob
     public String content;
 
+    public String msg;
     public File() {
     }
+
+    public File(String msg) {
+        this.msg=msg;
+    }
+
+
 
     public File(String name, String type, Long parentId, String content, String createdTime) {
         this.name = name;
