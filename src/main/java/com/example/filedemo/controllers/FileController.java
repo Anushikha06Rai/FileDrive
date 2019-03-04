@@ -16,10 +16,15 @@ public class FileController {
     @Autowired
     private FileService fileservice;
 
-    // Get all the files
+    // Get  files  by type
+    @RequestMapping("/files/{type}")
+    public List<File> getFilesByType(@PathVariable String type) {
+        return fileservice.getFilesByType(type);
+    }
+
+    // Get all  files
     @RequestMapping("/files")
     public List<File> getAllFiles() {
-        System.out.println(fileservice.getAllFiles());
         return fileservice.getAllFiles();
     }
 
@@ -28,6 +33,12 @@ public class FileController {
     public File getFileById(@PathVariable Long id) {
         System.out.println(id);
         return fileservice.getFileById(id);
+    }
+
+    // Get File Contents
+    @RequestMapping("/files/{type}/{id}")
+    public List<File> getParticualarFileByType(@PathVariable String type, @PathVariable Long id) {
+        return fileservice.getFileContents(type, id);
     }
 
     // Create a file
@@ -52,20 +63,20 @@ public class FileController {
         return fileservice.deleteFile(id);
     }
 
-    // copy  a file
+    //   copy  a file
 
-    @RequestMapping(method = RequestMethod.POST, value = "/files/{id}/copy")
-    public File copyFile(@PathVariable Long id) {
-        return fileservice.copyFile(id);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/files/{id}/duplicate")
+    public List<File> copyFile(@RequestBody File file, @PathVariable Long id) {
+        return fileservice.copyFile(file, id);
     }
-
 
     // move a file
 
     @RequestMapping(method = RequestMethod.PATCH, value = "/files/{id}/move", consumes = "application/json", produces = "application/json")
     //, produces = "text/plain")//, consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,  produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public File moveFile(@RequestBody File parentId, @PathVariable Long id) throws IOException {
-        return fileservice.moveFile(parentId, id);
+    public File moveFile(@RequestBody File target, @PathVariable Long id) throws IOException {
+        return fileservice.moveFile(target, id);
     }
 
     // cut a file
@@ -75,10 +86,9 @@ public class FileController {
     }
 
     //paste a file
-
     @RequestMapping(method = RequestMethod.POST, value = "/files/paste", consumes = "application/json", produces = "application/json")
-    //, produces = "text/plain")//, consumes= MediaType.MULTIPART_FORM_DATA_VALUE ,  produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public File pasteFile(@RequestBody File file) throws IOException {
         return fileservice.pasteFile(file);
     }
+
 }

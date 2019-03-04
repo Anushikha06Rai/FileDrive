@@ -20,7 +20,23 @@ public class FileService {
     @Autowired
     private FileRepository filerepository;
 
-    // Get all the files.
+    // Get  files by its type
+    public List<File> getFilesByType(String type) {
+        File df;
+        List<File> files = new ArrayList<>();
+        List<File> f = filerepository.findAll();//.forEach(files::add);
+        Iterator iterator = f.iterator();
+        while (iterator.hasNext()) {
+            df = (File) iterator.next();
+            if (df.type.equals(type)) {
+                files.add(df);
+            }
+
+        }
+        return files;
+    }
+
+
     public List<File> getAllFiles() {
         File df;
         List<File> files = new ArrayList<>();
@@ -28,9 +44,7 @@ public class FileService {
         Iterator iterator = f.iterator();
         while (iterator.hasNext()) {
             df = (File) iterator.next();
-            if (df.type.equals("file")) {
-                files.add(df);
-            }
+            files.add(df);
         }
         return files;
     }
@@ -39,6 +53,22 @@ public class FileService {
     //   Get a file by id
     public File getFileById(Long id) {
         return filerepository.findById(id).orElse(null);
+    }
+
+
+    // Get File Contents
+    public List<File> getFileContents(String type, Long id) {
+        File f1;
+        List<File> files = new ArrayList<>();
+        List<File> f = filerepository.findAll();//.forEach(files::add);
+        Iterator iterator = f.iterator();
+        while (iterator.hasNext()) {
+            f1 = (File) iterator.next();
+            if ((f1.getParentId() == id)) {
+                files.add(f1);
+            }
+        }
+        return files;
     }
 
 
@@ -100,31 +130,87 @@ public class FileService {
 
 
     // copy a file
-    public File copyFile(Long id) {
-        File file = filerepository.findById(id).orElse(null);
+    public List<File> copyFile(File target, Long fileId) {
+        File file = filerepository.findById(fileId).orElse(null);
+        List<File> f = filerepository.findAll();//.forEach(files::add);
+        Iterator itr = f.iterator();
+        File df;
         File copyFile = new File();
-        copyFile.setName(file.getName() + " Copy");
-        copyFile.setContent(file.getContent());
-        copyFile.setCreatedTime(file.getCreatedTime());
-        copyFile.setType(file.getType());
-        copyFile.setParentId(file.getParentId());
-        f.clear();
-        return filerepository.save(copyFile);
+        List<File> copiedFilesList = new ArrayList<>();
+        while (itr.hasNext()) {
+            df = (File) itr.next();
+            if ((df.getId() == target.getParentId()) && (df.getType().equals("file"))) {
+                throw new InvalidFileNameException("Invalid ParentId : " + target.getParentId());
+            } else if ((df.getId() == target.getParentId()) && (df.getType().equals("directory"))) {
+                //       df.setContent(df.getContent() + "|" + fileId);
+                //     filerepository.save(df);
+                if (file.getType().equals("file")) {
+                    copyFile.setName(file.getName() + " Copy");
+                    copyFile.setContent(file.getContent());
+                    copyFile.setCreatedTime(file.getCreatedTime());
+                    copyFile.setType(file.getType());
+                    copyFile.setParentId(target.getParentId());
+                    copiedFilesList.add(copyFile);
+                    filerepository.save(copyFile);
+                } else if (file.getType().equals("directory")) {
+                    directory(file, target.getParentId());
+                }
+            }
+        }
+        return copiedFilesList;
     }
 
 
-    // move a file
-    public File moveFile(File parentId, Long fileId) {
+    public List<File> directory(File file, Long parentId) {
+        List<File> copiedFilesList = new ArrayList<>();
+        File copyFile = new File();
+        copyFile.setName(file.getName() + " Copy");
+        copyFile.setContent(file.getContent());
+        Date date = new Date();
+        copyFile.setCreatedTime(date.toString());
+        copyFile.setType(file.getType());
+        copyFile.setParentId(parentId);
+        copiedFilesList.add(copyFile);
+        filerepository.save(copyFile);
+
+        // copying directory descendants
+        List<File> allFiles = filerepository.findAll();//.forEach(files::add);
+        Iterator iterator = allFiles.iterator();
+        File tempFile;
+        File duplicateFile;
+        while (iterator.hasNext()) {
+            tempFile = (File) iterator.next();
+            if ((file.getId() == tempFile.getParentId()) && (tempFile.getType().equals("file"))) {
+                duplicateFile = new File();
+                duplicateFile.setName(tempFile.getName());
+                duplicateFile.setContent(tempFile.getContent());
+                duplicateFile.setCreatedTime(tempFile.getCreatedTime());
+                duplicateFile.setType(tempFile.getType());
+                duplicateFile.setParentId(copyFile.getId());
+                copiedFilesList.add(duplicateFile);
+                filerepository.save(duplicateFile);
+
+            } else if ((copyFile.getId() == tempFile.getParentId()) && (tempFile.getType().equals("directory"))) {
+                directory(tempFile, copyFile.getId());
+            }
+        }
+        f.clear();
+        return copiedFilesList;
+    }
+
+    public File moveFile(File target, Long fileId) {
         File file = filerepository.findById(fileId).orElse(null);
         List<File> f = filerepository.findAll();//.forEach(files::add);
         Iterator itr = f.iterator();
         File df;
         while (itr.hasNext()) {
             df = (File) itr.next();
-            if ((df.getId() == parentId.getParentId()) && (df.getType().equals("file"))) {
-                throw new InvalidFileNameException("Invalid ParentId : " + parentId.getParentId());
-            } else if ((df.getId() == parentId.getParentId()) && (df.getType().equals("directory"))) {
-                file.setParentId(parentId.getParentId());
+            if ((df.getId() == target.getParentId()) && (df.getType().equals("file"))) {
+                throw new InvalidFileNameException("Invalid ParentId : " + target.getParentId());
+            } else if ((df.getId() == target.getParentId()) && (df.getType().equals("directory"))) {
+                df.setContent(df.getContent() + "|" + fileId);
+                filerepository.save(df);
+                file.setParentId(target.getParentId());
             }
         }
         f.clear();
@@ -137,29 +223,31 @@ public class FileService {
         f.add(file);
     }
 
+
+    //paste a file
     public File pasteFile(File file) throws IOException {
         if (f.isEmpty()) {
             throw new InvalidPasteException("Invalid Paste operation ");
         } else {
             List<File> allFiles = filerepository.findAll();//.forEach(files::add);
             Iterator allFilesItr = allFiles.iterator();
-            File buffer, df, temp;
-
-            Iterator bufferList = f.iterator();
+            File buffer, df;
+            Iterator bufferList = f.iterator();  // iterating a buffer
             while (bufferList.hasNext()) {
                 buffer = (File) bufferList.next();
-                filerepository.delete(buffer);
+                filerepository.delete(buffer);   // deleting already existing file in repository
                 while (allFilesItr.hasNext()) {
                     df = (File) allFilesItr.next();
                     if ((df.getId() == file.getParentId()) && (df.getType().equals("file"))) {
                         throw new InvalidFileNameException("Invalid ParentId : " + file.getParentId());
                     } else if ((df.getId() == file.getParentId()) && (df.getType().equals("directory"))) {
                         buffer.setParentId(file.getParentId());
-                        filerepository.save(buffer);
+                        filerepository.save(buffer);     // pasting file in repository
                     }
                 }
             }
             return new File("File pasted");
         }
     }
+
 }
