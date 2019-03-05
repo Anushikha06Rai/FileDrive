@@ -71,7 +71,6 @@ public class FileService {
         return files;
     }
 
-
     // Create a file
     public File storeFile(File file) throws IOException {
         if (file.name.contains("..")) {
@@ -102,7 +101,6 @@ public class FileService {
         return filerepository.save(resource);
     }
 
-
     // delete  a file
     public String deleteFile(Long id) {
         File file = filerepository.findById(id).orElse(null);
@@ -128,9 +126,8 @@ public class FileService {
         return "File Deleted";
     }
 
-
-    // copy a file
-    public List<File> copyFile(File target, Long fileId) {
+    // creating a duplicate copy of a file
+    public List<File> duplicateFile(File target, Long fileId) {
         File file = filerepository.findById(fileId).orElse(null);
         List<File> f = filerepository.findAll();//.forEach(files::add);
         Iterator itr = f.iterator();
@@ -144,6 +141,8 @@ public class FileService {
             } else if ((df.getId() == target.getParentId()) && (df.getType().equals("directory"))) {
                 //       df.setContent(df.getContent() + "|" + fileId);
                 //     filerepository.save(df);
+
+                // If file to be copy is a file
                 if (file.getType().equals("file")) {
                     copyFile.setName(file.getName() + " Copy");
                     copyFile.setContent(file.getContent());
@@ -152,7 +151,7 @@ public class FileService {
                     copyFile.setParentId(target.getParentId());
                     copiedFilesList.add(copyFile);
                     filerepository.save(copyFile);
-                } else if (file.getType().equals("directory")) {
+                } else if (file.getType().equals("directory")) {    // If file to be copy is a directory
                     directory(file, target.getParentId());
                 }
             }
@@ -161,7 +160,7 @@ public class FileService {
     }
 
 
-    public List<File> directory(File file, Long parentId) {
+    public List<File> directory(File file, Long parentId) { // If file to be copy is a directory
         List<File> copiedFilesList = new ArrayList<>();
         File copyFile = new File();
         copyFile.setName(file.getName() + " Copy");
@@ -180,6 +179,7 @@ public class FileService {
         File duplicateFile;
         while (iterator.hasNext()) {
             tempFile = (File) iterator.next();
+            //If descendant is a file
             if ((file.getId() == tempFile.getParentId()) && (tempFile.getType().equals("file"))) {
                 duplicateFile = new File();
                 duplicateFile.setName(tempFile.getName());
@@ -190,13 +190,16 @@ public class FileService {
                 copiedFilesList.add(duplicateFile);
                 filerepository.save(duplicateFile);
 
+                // If descendant is a  directory
             } else if ((copyFile.getId() == tempFile.getParentId()) && (tempFile.getType().equals("directory"))) {
-                directory(tempFile, copyFile.getId());
+                directory(tempFile, copyFile.getId());  // recursive call to a function if file is a directory
             }
         }
         f.clear();
         return copiedFilesList;
     }
+
+    // Move  a file
 
     public File moveFile(File target, Long fileId) {
         File file = filerepository.findById(fileId).orElse(null);
@@ -216,38 +219,4 @@ public class FileService {
         f.clear();
         return filerepository.save(file);
     }
-
-    // cut a file
-    public void cutFile(Long id) {
-        File file = filerepository.findById(id).orElse(null);
-        f.add(file);
-    }
-
-
-    //paste a file
-    public File pasteFile(File file) throws IOException {
-        if (f.isEmpty()) {
-            throw new InvalidPasteException("Invalid Paste operation ");
-        } else {
-            List<File> allFiles = filerepository.findAll();//.forEach(files::add);
-            Iterator allFilesItr = allFiles.iterator();
-            File buffer, df;
-            Iterator bufferList = f.iterator();  // iterating a buffer
-            while (bufferList.hasNext()) {
-                buffer = (File) bufferList.next();
-                filerepository.delete(buffer);   // deleting already existing file in repository
-                while (allFilesItr.hasNext()) {
-                    df = (File) allFilesItr.next();
-                    if ((df.getId() == file.getParentId()) && (df.getType().equals("file"))) {
-                        throw new InvalidFileNameException("Invalid ParentId : " + file.getParentId());
-                    } else if ((df.getId() == file.getParentId()) && (df.getType().equals("directory"))) {
-                        buffer.setParentId(file.getParentId());
-                        filerepository.save(buffer);     // pasting file in repository
-                    }
-                }
-            }
-            return new File("File pasted");
-        }
-    }
-
 }
