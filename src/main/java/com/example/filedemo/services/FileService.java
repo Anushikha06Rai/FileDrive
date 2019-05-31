@@ -1,7 +1,6 @@
 package com.example.filedemo.services;
 
 import com.example.filedemo.exception.InvalidFileNameException;
-import com.example.filedemo.exception.InvalidPasteException;
 import com.example.filedemo.model.File;
 import com.example.filedemo.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ public class FileService {
         }
         return files;
     }
-
 
     public List<File> getAllFiles() {
         File df;
@@ -126,8 +124,42 @@ public class FileService {
         return "File Deleted";
     }
 
-    // creating a duplicate copy of a file
-    public List<File> duplicateFile(File target, Long fileId) {
+//     creating a duplicate copy of a file
+//    public List<File> duplicateFile(File target, Long fileId) {
+//        File file = filerepository.findById(fileId).orElse(null);
+//        List<File> f = filerepository.findAll();//.forEach(files::add);
+//        Iterator itr = f.iterator();
+//        File df;
+//        File copyFile = new File();
+//        List<File> copiedFilesList = new ArrayList<>();
+//        while (itr.hasNext()) {
+//            df = (File) itr.next();
+//            if ((df.getId() == target.getParentId()) && (df.getType().equals("file"))) {
+//                throw new InvalidFileNameException("Invalid ParentId : " + target.getParentId());
+//            } else if ((df.getId() == target.getParentId()) && (df.getType().equals("directory"))) {
+//                //       df.setContent(df.getContent() + "|" + fileId);
+//                //     filerepository.save(df);
+//
+//                // If file to be copy is a file
+//                if (file.getType().equals("file")) {
+//                    copyFile.setName(file.getName() + " Copy");
+//                    copyFile.setContent(file.getContent());
+//                    copyFile.setCreatedTime(file.getCreatedTime());
+//                    copyFile.setType(file.getType());
+//                    copyFile.setParentId(target.getParentId());
+//                    copiedFilesList.add(copyFile);
+//                    filerepository.save(copyFile);
+//                } else if (file.getType().equals("directory")) {    // If file to be copy is a directory
+//                    directory(file, target.getParentId());
+//                }
+//            }
+//        }
+//        return copiedFilesList;
+//    }
+
+
+
+    public List<File> duplicateFile(Long fileId) {
         File file = filerepository.findById(fileId).orElse(null);
         List<File> f = filerepository.findAll();//.forEach(files::add);
         Iterator itr = f.iterator();
@@ -136,9 +168,9 @@ public class FileService {
         List<File> copiedFilesList = new ArrayList<>();
         while (itr.hasNext()) {
             df = (File) itr.next();
-            if ((df.getId() == target.getParentId()) && (df.getType().equals("file"))) {
-                throw new InvalidFileNameException("Invalid ParentId : " + target.getParentId());
-            } else if ((df.getId() == target.getParentId()) && (df.getType().equals("directory"))) {
+            if ((df.getId() == file.getParentId()) && (df.getType().equals("file"))) {
+                throw new InvalidFileNameException("Invalid ParentId : " + file.getParentId());
+            } else if ((df.getId() == file.getParentId()) && (df.getType().equals("directory"))) {
                 //       df.setContent(df.getContent() + "|" + fileId);
                 //     filerepository.save(df);
 
@@ -148,17 +180,16 @@ public class FileService {
                     copyFile.setContent(file.getContent());
                     copyFile.setCreatedTime(file.getCreatedTime());
                     copyFile.setType(file.getType());
-                    copyFile.setParentId(target.getParentId());
+                    copyFile.setParentId(file.getParentId());
                     copiedFilesList.add(copyFile);
                     filerepository.save(copyFile);
                 } else if (file.getType().equals("directory")) {    // If file to be copy is a directory
-                    directory(file, target.getParentId());
+                    directory(file,file.getParentId());
                 }
             }
         }
         return copiedFilesList;
     }
-
 
     public List<File> directory(File file, Long parentId) { // If file to be copy is a directory
         List<File> copiedFilesList = new ArrayList<>();
@@ -201,19 +232,19 @@ public class FileService {
 
     // Move  a file
 
-    public File moveFile(File target, Long fileId) {
+    public File moveFile(Long target, Long fileId) {
         File file = filerepository.findById(fileId).orElse(null);
         List<File> f = filerepository.findAll();//.forEach(files::add);
         Iterator itr = f.iterator();
         File df;
         while (itr.hasNext()) {
             df = (File) itr.next();
-            if ((df.getId() == target.getParentId()) && (df.getType().equals("file"))) {
-                throw new InvalidFileNameException("Invalid ParentId : " + target.getParentId());
-            } else if ((df.getId() == target.getParentId()) && (df.getType().equals("directory"))) {
+            if ((df.getId() == target) && (df.getType().equals("file"))) {
+                throw new InvalidFileNameException("Invalid ParentId : " + target);
+            } else if ((df.getId() == target) && (df.getType().equals("directory"))) {
                 df.setContent(df.getContent() + "|" + fileId);
                 filerepository.save(df);
-                file.setParentId(target.getParentId());
+                file.setParentId(target);
             }
         }
         f.clear();
