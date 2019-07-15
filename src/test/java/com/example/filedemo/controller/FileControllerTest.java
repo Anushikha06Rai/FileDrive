@@ -27,8 +27,11 @@ public class FileControllerTest extends AbstractTest {
 //        super.setUp();
 //    }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
     @Test
     public void getAllFiles() throws Exception {
         File file = new File();
@@ -40,6 +43,10 @@ public class FileControllerTest extends AbstractTest {
         when(fileService.getAllFiles()).thenReturn((Collections.singletonList(file)));
         mockMvc.perform(get("/files"))
                 .andDo(print())
+<<<<<<< HEAD
+=======
+
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].name").value("JAVA File"))
@@ -49,7 +56,10 @@ public class FileControllerTest extends AbstractTest {
     }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
     @Test
     public void getFileById() throws Exception {
         String uri = "/files/2";
@@ -58,11 +68,16 @@ public class FileControllerTest extends AbstractTest {
         file.setContent("Java");
         file.setParentId(0L);
         file.setType("file");
+<<<<<<< HEAD
         file.setName("JAVA File");
+=======
+           file.setName("JAVA File");
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
 
         String inputJson = super.mapToJson(file);
         MvcResult mvcResult = mockMvc.perform(get(uri)
                 .accept(MediaType.APPLICATION_JSON_VALUE).content(inputJson)).andReturn();
+<<<<<<< HEAD
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
 
@@ -87,6 +102,36 @@ public class FileControllerTest extends AbstractTest {
 //        String content = mvcResult.getResponse().getContentAsString();
 //        assertTrue(content.isEmpty() == false);
 //       }
+=======
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+    }
+
+
+    @Test
+    public void getFileByType() throws Exception {
+        String uri = "/files/file";
+        File file = new File();
+        file.setId(1L);
+        file.setContent("Java");
+        file.setParentId(0L);
+        file.setType("file");
+        file.setName("JAVA File");
+        String inputJson = super.mapToJson(file);
+        MvcResult mvcResult = mockMvc.perform(get(uri)
+                .accept(MediaType.APPLICATION_JSON_VALUE).content(inputJson)).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+//        String content = mvcResult.getResponse().getContentAsString();
+//        assertTrue(content.isEmpty() == false);
+
+
+    }
+
+
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
 
     @Test
     public void createFile() throws Exception {
@@ -95,7 +140,11 @@ public class FileControllerTest extends AbstractTest {
         file.setId(1L);
         file.setContent("Java");
         file.setParentId(0L);
+<<<<<<< HEAD
         file.setType("file");      file.setId(1L);
+=======
+        file.setType("file");
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
         file.setName("JAVA File");
         when(fileService.storeFile(argThat(file1 -> file1.id.equals(file.id)))).thenReturn(file);
         mockMvc.perform(post("/files").contentType("application/json").content(new ObjectMapper().writeValueAsString(file)))
@@ -119,6 +168,11 @@ public class FileControllerTest extends AbstractTest {
         //  assertEquals(content, "Product is deleted successsfully");
     }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
     @Test
     public void updateAFile() throws Exception {
         String uri = "/files/2";
@@ -194,6 +248,7 @@ public class FileControllerTest extends AbstractTest {
     //  }
 //
 
+<<<<<<< HEAD
 
     @Test
     public void moveFile() throws Exception {
@@ -218,6 +273,30 @@ public class FileControllerTest extends AbstractTest {
 //        verify(fileService, times(1)).moveFile(file, 1L);
 //    }
 
+=======
+//    @Test
+//    public void moveFile() throws Exception {
+//        String uri = "/files/2";
+//        File file = new File();
+//        file.setName("New file it is....... ");
+//        String inputJson = super.mapToJson(file);
+//        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(uri)
+//                .contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson)).andReturn();
+//        int status = mvcResult.getResponse().getStatus();
+//        assertEquals(200, status);
+//        String content = mvcResult.getResponse().getContentAsString();
+//        //      assertEquals(content, "Product is updated successsfully");
+//    }
+
+    // RequestBody in content
+    @Test
+    public void testMoveFile() throws Exception {
+
+        mockMvc.perform(patch("/files/1/move").contentType("application/json").content("10")).andExpect(status().isOk());
+        verify(fileService, times(1)).moveFile(10L, 1L);
+    }
+
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
     @Test
     public void testDuplicateFile() throws Exception {
         String uri = "/files/1/duplicate";

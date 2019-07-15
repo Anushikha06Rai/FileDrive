@@ -87,12 +87,15 @@ public class FileServiceTest {
     }
 
 
+<<<<<<< HEAD
     public void createNewFile(){
 
 
     }
 
 
+=======
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
     @Test
     public void updateToDo() throws IOException {
         File file = new File();
@@ -112,7 +115,11 @@ public class FileServiceTest {
         when(fileRepository.save(file)).thenReturn(file);
         when(fileRepository.findById(file.getId())).thenReturn(Optional.of(file));
         when(fileRepository.findAll()).thenReturn(Collections.singletonList(file));
+<<<<<<< HEAD
         List<File> result = fileService.duplicateFile(file, file.getId());
+=======
+        List<File> result = fileService.duplicateFile(file.getId());
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
         Iterator it = result.iterator();
         File f = new File();
         while (it.hasNext()) {
@@ -127,13 +134,22 @@ public class FileServiceTest {
 
     }
 
+<<<<<<< HEAD
+=======
+//Actually I did a mistake in filling   previous week time sheet. Since I was left with no leaves (casual and earned) and was on loss of pay.
+
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
     @Test
     public void moveFileTest() throws IOException {
         File file = new File("File1", "directory", 0L, "File1 Content", "29-June-2018");
         file.setId(1L);
         when(fileRepository.save(file)).thenReturn(file);
         when(fileRepository.findById(file.getId())).thenReturn(Optional.of(file));
+<<<<<<< HEAD
         File result = fileService.moveFile(file, file.getId());
+=======
+        File result = fileService.moveFile(file.getParentId(), file.getId());
+>>>>>>> cbc18b922cfbc0b4e2c422aebed6417ba6470924
         if (result != null) {
             assertEquals((Long) 1L, result.getId());
             assertEquals("File1 Content", result.getContent());
